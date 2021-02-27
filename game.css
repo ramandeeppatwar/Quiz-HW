@@ -1,0 +1,54 @@
+:root {
+    --purple: rgba(65, 5, 105, 0.842);
+}
+
+.container {
+height: 100px;
+width: 300px;
+}
+
+.choice-container {
+    display: flex;
+    margin-bottom: 0.8rem;
+    padding-bottom: 2rem;
+    border-radius: 4px;
+    background-color: var(--purple);
+    font-size: 15px;
+    min-width: 10rem;
+    height: 3rem;
+}
+
+.choice-container:hover {
+cursor: pointer;
+box-shadow: 0 0.4rem 1.4rem 0;
+opacity: 0.7;
+}
+
+.choice-prefix {
+    padding: 2rem 2.5rem;
+    color: white;
+}
+
+.choice-text {
+    padding: 2rem;
+    width: 100%;
+}
+
+.correct {
+    background-color: linear-gradient(green 100%);
+}
+
+.incorrect {
+    background-color: linear-gradient(red 100%);
+}
+
+#hud {
+    display: flex;
+    justify-content: space-between;
+}
+
+@media screen and (max-width: 768px) {
+    .choice-container {
+        min-width: 20rem;
+    }
+}

@@ -15,3 +15,9 @@
 #start-button {
     background-color: var(--purple);
 }
+
+button:hover {
+    cursor: pointer;
+    box-shadow: 0 0.4rem 1.4rem 0;
+    opacity: 0.7;
+}
