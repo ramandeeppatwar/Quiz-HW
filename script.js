@@ -1,120 +1,223 @@
-const question = document.querySelector('#question');
-const choices = Array.from(document.querySelectorAll('.choice-text'));
-const progressText = document.querySelector('#progressText');
-const scoreText = document.querySelector('#score');
-const progressBarFull = document.querySelector('#progressBarFull');
+// *************** Grab DOM Elements ****************
+const startBtn = document.getElementById("startButton");
+const answer1 = document.getElementById("answer1");
+const answer2 = document.getElementById("answer2");
+const answer3 = document.getElementById("answer3");
+const answer4 = document.getElementById("answer4");
+const answers = document.getElementById("answers");
+const questionText = document.getElementById("questionText");
+const gameContainer = document.getElementById("game-div");
+const timer = document.querySelector("#time");
+const messageDiv = document.querySelector("#message");
 
-let currentQuestion = {}
-let acceptingAnswers = true
-let score = 0
-let questionCounter = 0
-let availableQuestions = []
+// **************** Declare Variables *******************
+let score = 0;
+let time = 60;
+let randQuestion = "";
+let questionIndex = 0;
+let savedScores;
+let scoreList = [];
+let correctSound = new Audio("sounds/green.mp3");
+let incorrectSound = new Audio("sounds/red.mp3");
 
-let question = [
-    {
-        question: "Which of the following is correct about features of JavaScript?",
-        Choice1: "JavaScript is a lightweight, interpreted programming language.",
-        Choice2: "JavaScript is designed for creating network-centric applications.",
-        Choice3: "JavaScript is complementary to and integrated with Java.",
-        Choice4: "All of the above.",
-        answer: 4,
-    },
-    {
-        question: "Which of the following is correct about callbacks?",
-        Choice1: "A callback is a plain JavaScript function passed to some method as an argument or option.",       
-        Choice2: "Some callbacks are just events, called to give the user a chance to react when a certain state is triggered.",       
-        Choice3: "Both of the above.",
-        Choice4: "None of the above.",
-        answer: 3,
-    },
-    {
-        question: "Which built-in method returns the characters in a string beginning at the specified location?",
-        Choice1: "substr()",       
-        Choice2: "getSubstring()",       
-        Choice3: "slice()",
-        Choice4: "None of the above.",
-        answer: 1,  
-    },
-    {
-        question: "Which of the following function of Boolean object returns a string containing the source of the Boolean object?",
-        Choice1: "toSource()",       
-        Choice2: "valueOf()",       
-        Choice3: "toString()",
-        Choice4: "None of the above.",
-        answer: 1,  
-    },
-    {
-        question: "Which of the following function of String object creates a string to be displayed in a big font as if it were in a <big> tag?",
-        Choice1: "anchor()",       
-        Choice2: "big()",       
-        Choice3: "blink()",
-        Choice4: "italics",
-        answer: 2,  
+startButton.addEventListener("click", startGame);
+
+// **************** Set Timer *******************
+function setTime() {
+  let timerInterval = setInterval(() => {
+    time--;
+    timer.textContent = `Timer: ${time}`;
+
+    if (time === 0) {
+      clearInterval(timerInterval);
+      alert("You ran out of time!");
+      endGame();
+    } else if (questionIndex === questions.length) {
+      clearInterval(timerInterval);
     }
-]
-
-const SCORE_POINTS = 100
-const MAX_QUESTIONS = 5
-
-startGame = () => {
-    questionCounter = 0
-    score = 0
-    availableQuestions = [...questions]
-    getNewQuestion()
+  }, 1000);
+  return score;
 }
 
-getNewQuestion = () => {
-    if(availableQuestions.length === 0 || questionCounter > MAX_QUESTIONS) {
-        localStorage.setItem('mostRecentScore', score)
-
-        return window.location.assign('/end.html')
-    }
-
-    questionCounter++
-    progressText.innerText = `Question ${questionCounter} of ${MAX_QUESTIONS}`
-    progressBarFull.style.width = `${(questionCounter/MAX_QUESTIONS) * 100}%`
-    
-    const questionsIndex = Math.floor(Math.random() * availableQuestions.length)
-    currentQuestion = availableQuestions[questionsIndex]
-    question.innerText = currentQuestion.question
-
-    choices.forEach(choice => {
-        const number = choice.dataset['number']
-        choice.innerText = currentQuestion['choice' + number]
-    })
-
-    availableQuestions.splice(questionsIndex, 1)
-
-    acceptingAnswers = true
+// **************** Start Game *******************
+function startGame() {
+  randQuestion = questions.sort(() => Math.random() - 0.5);
+  questionIndex = 0;
+  showNextQuestion();
 }
 
-choices.forEach(choice => {
-    choice.addEventListener('click', e => {
-        if(!acceptingAnswers) return
-
-        acceptingAnswers = false
-        const selectedChoice = e.target
-        const selectedAnswer = selectedChoice.dataset['number']
-
-        let classToApply = selectedAnswer == currentQuestion.answer ? 'correct' : 'incorrect'
-
-        if(classToApply === 'correct') {
-            incrementScore(SCORE_POINTS)
-        }
-
-        selectedChoice.parentElement.classList.add(classToApply)
-
-        setTimeout(() => {
-            selectedChoice.parentElement.classList.remove(classToApply)
-            getNewQuestion()
-
-        }, 1000)
-    })
-})
-
-incrementScore = num => {
-    score +=num
-    scoreText.innerText = score
+// **************** Show Next Question *******************
+function showNextQuestion() {
+  showQuestion(randQuestion[questionIndex]);
 }
 
-startGame()
+// **************** Get New Question *******************
+function showQuestion() {
+  answer1.hidden = false;
+  answer2.hidden = false;
+  answer3.hidden = false;
+  answer4.hidden = false;
+
+  startButton.classList.add("hide");
+  if (questionIndex === questions.length) {
+    endGame();
+  } else {
+    questionText.innerText = questions[questionIndex].question;
+    answer1.textContent = questions[questionIndex]["choices"][0];
+    answer2.textContent = questions[questionIndex]["choices"][1];
+    answer3.textContent = questions[questionIndex]["choices"][2];
+    answer4.textContent = questions[questionIndex]["choices"][3];
+  }
+}
+
+// ************ Select Answer Function *****************
+function selectAnswer(answer) {
+  if (
+    questions[questionIndex].answer === questions[questionIndex].choices[answer]
+  ) {
+    messageDiv.textContent = "Correct!";
+    score += 20;
+    console.log(score);
+    correctSound.play();
+  } else {
+    messageDiv.textContent = "Incorrect!";
+    score -= 20;
+    time -= 10;
+    incorrectSound.play();
+  }
+  questionIndex++;
+  showNextQuestion();
+}
+
+// Functions to pass in as values in the selectAnswer argument
+function choice0() {
+  selectAnswer(0);
+}
+function choice1() {
+  selectAnswer(1);
+}
+function choice2() {
+  selectAnswer(2);
+}
+function choice3() {
+  selectAnswer(3);
+}
+
+// **************** End Game Function ********************
+function endGame() {
+  let scoreTag = document.createElement("h1");
+  let inputTag = document.createElement("input");
+  let submitButton = document.createElement("button");
+
+  score += 20;
+
+  messageDiv.classList.add("hide");
+  questionText.textContent = "Game Over";
+
+  answer1.remove();
+  answer2.remove();
+  answer3.remove();
+  answer4.remove();
+
+  document.body.children[1].appendChild(scoreTag);
+  document.getElementsByTagName("h1")[0].setAttribute("id", "score");
+  document.getElementById("score").textContent = `Your score is: ${score}`;
+  document.body.children[1].appendChild(inputTag);
+  document.getElementsByTagName("input")[0].setAttribute("id", "input-field");
+
+  submitButton.textContent = "Submit";
+  document.body.children[1].appendChild(submitButton);
+  document.getElementsByTagName("button")[0].setAttribute("id", "btn");
+  submitButton.addEventListener("click", function (event) {
+    event.preventDefault();
+    let highScoreText = new Object();
+    highScoreText.name = inputTag.value.trim();
+    highScoreText.newScore = score;
+    storeScores(highScoreText);
+    window.location.href = "highScores.html";
+  });
+}
+
+// ***************** local storage function ***************
+
+function storeScores(highScoreText) {
+  tempArray = JSON.parse(localStorage.getItem("scores"));
+  if (tempArray === null) {
+    scoreList.push(highScoreText);
+    localStorage.setItem("scores", JSON.stringify(scoreList));
+  } else {
+    tempArray.push(highScoreText);
+    localStorage.setItem("scores", JSON.stringify(tempArray));
+  }
+}
+
+// Add Boolean globally to hide the answer buttons on page load
+answer1.hidden = true;
+answer2.hidden = true;
+answer3.hidden = true;
+answer4.hidden = true;
+
+// ************** Event Listeners ***************
+startButton.addEventListener("click", showQuestion);
+startButton.addEventListener("click", setTime);
+startButton.addEventListener("click", () => {
+  messageDiv.textContent = "";
+});
+answer1.addEventListener("click", choice0);
+answer2.addEventListener("click", choice1);
+answer3.addEventListener("click", choice2);
+answer4.addEventListener("click", choice3);
+
+// ************************* Questions ***********************
+const questions = [
+  {
+    question: "How do you create a function in JavaScript",
+    choices: [
+      "function myFunction()",
+      "function = myFunction()",
+      "function:myFnction()",
+      "function()",
+    ],
+    answer: "function myFunction()",
+  },
+  {
+    question: "Which event occurs when the user clicks on an HTML element?",
+    choices: ["onmouseclick", "onchange", "onclick", "onmouseover"],
+    answer: "onclick",
+  },
+  {
+    question: "What does CSS stand for?",
+    choices: [
+      "Colorful Style Sheets",
+      "Creative Style Sheets",
+      "Computer Style Sheets",
+      "Cascading Style Sheets",
+    ],
+    answer: "Cascading Style Sheets",
+  },
+  {
+    question: "How can you make a bulleted list in HTML?",
+    choices: ["<ol>", "<ul>", "<dl>", "<list>"],
+    answer: "<ul>",
+  },
+  {
+    question: "How do you write 'Hello World' in an alert box?",
+    choices: [
+      "alert('Hello World')",
+      "msg('Hello World')",
+      "msgBox('Hello World')",
+      "alertBox('Hello World')",
+    ],
+    answer: "alert('Hello World')",
+  },
+  {
+    question: "Arrays in JavaScript can be used to store______",
+    choices: [
+      "Numbers and strings",
+      "Other arrays",
+      "Booleans",
+      "All of the above",
+    ],
+    answer: "All of the above",
+  },
+];
