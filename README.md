@@ -36,5 +36,5 @@ Available for clone or download. Languages used were HTML, CSS & Javascript.
 
 ---
 
-![screenshot]()
+![screenshot](https://github.com/ramandeeppatwar/Quiz-HW/blob/main/screenshot.jpg)
 
